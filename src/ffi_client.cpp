@@ -30,6 +30,14 @@
 
 namespace livekit {
 
+namespace {
+
+std::string bytesToString(const std::vector<std::uint8_t> &b) {
+  return std::string(reinterpret_cast<const char *>(b.data()), b.size());
+}
+
+} // namespace
+
 FfiClient::FfiClient() {
   livekit_ffi_initialize(&LivekitFfiCallback, false, LIVEKIT_BUILD_FLAVOR,
                          LIVEKIT_BUILD_VERSION_FULL);
@@ -160,10 +168,18 @@ FfiClient::connectAsync(const std::string &url, const std::string &token,
         static_cast<proto::EncryptionType>(eo.encryption_type));
 
     auto *kp = enc->mutable_key_provider_options();
-    kp->set_shared_key(eo.shared_key);
-    kp->set_ratchet_salt(eo.ratchet_salt);
-    kp->set_failure_tolerance(eo.failure_tolerance);
-    kp->set_ratchet_window_size(eo.ratchet_window_size);
+    if (!eo.shared_key.empty()) {
+      kp->set_shared_key(bytesToString(eo.shared_key));
+    }
+    if (!eo.ratchet_salt.empty()) {
+      kp->set_ratchet_salt(bytesToString(eo.ratchet_salt));
+    }
+    if (eo.ratchet_window_size > 0) {
+      kp->set_ratchet_window_size(eo.ratchet_window_size);
+    }
+    if (eo.failure_tolerance != 0) {
+      kp->set_failure_tolerance(eo.failure_tolerance);
+    }
   }
 
   // --- RTC configuration (optional) ---
