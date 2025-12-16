@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.31.0)
 project(livekit LANGUAGES C CXX)
 
+# ---- Build options ----
+option(LIVEKIT_BUILD_EXAMPLES "Build LiveKit examples" ON)
+
 # ---- C++ standard ----
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -334,8 +337,11 @@ else()
 endif()
 
 # ---- Examples ----
-add_subdirectory(examples)
-
+if(LIVEKIT_BUILD_EXAMPLES)
+  add_subdirectory(examples)
+else()
+  message(STATUS "LiveKit examples disabled (LIVEKIT_BUILD_EXAMPLES=OFF)")
+endif()
 
 # ---------- Clean helpers ----------
 # Removes generated protobuf sources
